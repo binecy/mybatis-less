@@ -1,12 +1,12 @@
 # Mybatis-Less
 
-Mybatis-Less是基于Mybatis开发的一个插件，可以根据Mapper接口的方法注解在应用启动时自动生成动态SQL，同时支持使用Mybatis注解注入SQL，方便我们编写复杂SQL。
+Mybatis-Less是基于Mybatis开发的一个插件，可以根据Mapper接口的方法注解自动生成动态SQL，同时支持使用Mybatis注解注入SQL，方便我们编写复杂SQL。
 Mybatis-Less支持Mybatis-3.3及以上版本。
 
 ## 特性
 
 **为什么写这个插件**
-先说一下为什么写这个插件。
+先说一下为什么写这个插件。  
 我们喜欢Mybatis，因为它灵活，可以自行编写各种SQL，满足我们复杂的业务逻辑。
 但使用Mybatis，要编写很多简单的，重复的SQL。
 如果可以自动生成这些简单SQL，就可以减少大量不必要的工作。
@@ -146,7 +146,7 @@ select * from subject
     id in <foreach collection='collection' item='item' open='(' close=') ' separator=','>#{item}</foreach>
 </where>
 ```
-注意：参数名不必与属性名完成相同，但必须以字段名开头，如上例中的ids。
+**注意：参数名不必与属性名完成相同，但必须以字段名开头，如上例中的ids。**
 
 #### 关系运算符
 查询条件中的关系运算符默认为=，集合参数的关系运算符默认为in，可以通过以下参数注解修改关系运算符
@@ -161,7 +161,7 @@ select * from subject
 | @Like    | like   |
 | @NotIn   | not in |
 
-注意：关系运算符注解表示数据库列与查询参数的对比。如@Gt表示列大于查询参数。
+**注意：关系运算符注解表示数据库列与查询参数的对比。如@Gt表示列大于查询参数。**
 
 使用关系运算符注解，按时间范围查询
 ```
@@ -215,7 +215,7 @@ select * from subject
 </where>
 group by author having sum(read_count) > #{readCountStart}
 ```
-注意：用于having条件的参数不再生成where条件。
+**注意：用于having条件的参数不再生成where条件。**
 
 ### 更新
 更新操作可以更新属性或者更新实体。
@@ -233,7 +233,7 @@ update subject
 	id= #{id}
 </where>
 ```
-注意：必须遵循约定，用于查询的参数在前，用于更新的参数在后（参数必须以属性名开头），中间以@UpdateProperty分隔。
+**注意：必须遵循约定，用于查询的参数在前，用于更新的参数在后（参数必须以属性名开头），中间以@UpdateProperty分隔。**
 @IgnoreNull注解表示该参数为null，则不更新该列。
 
 #### 更新实体
@@ -252,7 +252,7 @@ update subject
 	</set>
 	<where> id= #{id} </where>
 ```
-注意：同样要遵循约定，用于查询的参数在前，用于更新的实体类参数在最后。
+**注意：同样要遵循约定，用于查询的参数在前，用于更新的实体类参数在最后。**
 如果只更新一部分字段，可以使用UpdateProperty注解标示需更新的字段和ignoreNull的字段
 ```
 @UpdateProperty(value = "title,content", ignoreNullProperty = "content")
@@ -372,7 +372,7 @@ List<Subject> pageById(@Gt long id, int pageSize);
 ---> 动态SQL
 select * from subject <where>id > #{id}</where> limit #{pageSize}
 ```
-注意：pageNum从1开始。
+**注意：pageNum从1开始。**
 
 ## 使用
 ### @TableMapping
@@ -418,7 +418,6 @@ public interface SubjectMapper {
 ### @Param
 如果使用jdk8+，Mybatis3.5+, 并且使用'-parameters'编译代码，可以不用@Param注解标注参数（推荐使用这种方法）。
 否则必须要使用@Param标注参数名。
-
 **注意：原来的Mybatis的#{param1}, #{param2}的默认参数名不可以使用。**
 
 ### 扩展
@@ -427,7 +426,7 @@ SQLSessionFactoryBuilder.build方法的Properties参数可以传入用户定义�
 ```java
 properties.put("mybatisLess.processor.methodPrefix.alter",  new AlterSQLBuilder());
 ```
-alter为方法前缀，AlterSQLBuilder需要实现SQLBuilder接口，构建动态SQL。  
+alter为方法前缀，AlterSQLBuilder需要实现SQLBuilder接口，构建动态SQL。
 默认SQLBuilder接口：
 * UpdateSQLBuilder负责构建Update SQL
 * InsertSQLBuilder负责构建Insert SQL
