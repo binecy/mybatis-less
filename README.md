@@ -52,6 +52,7 @@ Mybatis-Less会在应用启动时生成动态SQL，不会对应用运行性能�
     * [启动LessSqlSessionFactoryBuilder](#启动LessSqlSessionFactoryBuilder)
     * [支持Spring-Boot](#支持Spring-Boot)
     * [@Param](#@Param)
+    * [兼容mybatis](#兼容mybatis-1)
     * [扩展](#扩展)
     * [关闭驼峰转化下划线开关](#关闭驼峰转化下划线开关)
     * [注解总结](#注解总结)
@@ -438,7 +439,7 @@ public interface SubjectMapper {
 否则必须要使用@Param标注参数名。  
 *注意：原来的Mybatis的#{param1}, #{param2}的默认参数名不可以使用。*
 
-### 兼容mybatis
+### 兼容Mybatis
 在一个Mapper接口中，可以同时定义Mybatis-Less生成SQL方法和Mybatis注入SQL的方法
 ```java
 public interface SubjectMapper {
@@ -484,16 +485,15 @@ properties.put("mybatisLess.mapping.toUnderLine", "false");
 | @BatchUpdateKey   | 方法     | 批量更新时，指定用于查询和更新的字段 |
 | @Condition | 方法 | 编写查询SQL |
 | @IgnoreNull | 参数 | 如果该参数为null，不作为查询条件 |
-| @Gt | 参数 | 操作符 > |
-| @GtEq | 参数 | 操作符 >= |
-| @Lt | 参数 | 操作符 < |
-| @LtEq | 参数 | 操作符 <= |
-| @NotEq | 参数 | 操作符 <> |
-| @NotIn | 参数 | 操作符 not in |
-| @Like | 参数 | 操作符 like，属性value：支持Mybatis ${}占位符 |
+| @Gt | 参数 | 关系运算符 > |
+| @GtEq | 参数 | 关系运算符 >= |
+| @Lt | 参数 | 关系运算符 < |
+| @LtEq | 参数 | 关系运算符 <= |
+| @NotEq | 参数 | 关系运算符 <> |
+| @NotIn | 参数 | 关系运算符 not in |
+| @Like | 参数 | 关系运算符 like，属性value：支持Mybatis ${}占位符 |
 | @Order | 方法 | 指定排序字段，属性by：排序字段，desc：true表示倒序 |
 | @Group | 方法 | 指定分组字段，属性by：分组字段，having：编写having条件 |
-| @Or | 参数 | 条件连接符or |
 
 ## todo
 批量操作，分页支持其他数据库
