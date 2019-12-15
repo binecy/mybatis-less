@@ -10,7 +10,7 @@ Mybatis-Less支持Mybatis-3.3及以上版本。
 我们喜欢Mybatis，因为它灵活，可以自行编写各种SQL，满足我们复杂的业务逻辑。
 但使用Mybatis，要编写很多简单的，重复的SQL。
 如果可以自动生成这些简单SQL，就可以减少大量不必要的工作。
-同时还需要支持使用Mybatis注解注入SQL的方法，方便我们根据需要编写复杂SQL。
+同时还需要支持使用Mybatis注解注入SQL，方便我们根据需要编写复杂SQL。
 于是，Mybatis-Less就应运而生了。
 
 ### 入门简单
@@ -48,7 +48,7 @@ Mybatis-Less会在应用启动时生成动态SQL，不会对应用运行性能�
 	* [分页](#分页)
 * [使用](#使用)
     * [@TableMapping](#@TableMapping)
-    * [启动LessSqlSessionFactoryBuilder}(#启动LessSqlSessionFactoryBuilder)
+    * [启动LessSqlSessionFactoryBuilder](#启动LessSqlSessionFactoryBuilder)
     * [支持Spring-Boot](#支持Spring-Boot)
     * [@Param](#@Param)
     * [扩展](#扩展)
@@ -106,7 +106,7 @@ values (#{id},#{title},#{content},#{author},#{readCount},#{createTime})
 ```
 下面就是Mybatis-Less生成的动态SQL。
 
-Mybatis-Less支持与Mybatis的@Options注解共用，所以如果要使用mySQL的自增id，可以添加@Options注解
+Mybatis-Less支持与Mybatis的@Options注解共用，如果要使用mySQL的自增id，可以添加@Options注解
 ```java
 @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
 Integer insertSubject(Subject subject);
@@ -161,7 +161,7 @@ select * from subject
 | @Like    | like   |
 | @NotIn   | not in |
 
-注意：以上的注解表示数据库列与查询参数的对比。如@Gt表示列大于查询参数。
+注意：关系运算符注解表示数据库列与查询参数的对比。如@Gt表示列大于查询参数。
 
 使用关系运算符注解，按时间范围查询
 ```
@@ -205,7 +205,7 @@ desc为true表示倒序
 
 #### 分组
 可以使用@Group指定分组的列以及having条件
-```java
+```
 @Group(by = "author", having = "sum(read_count) > readCountStart")
 List<Subject> groupByAuthor(@Gt Date createTimeStart,@InHaving int readCountStart);
 ---> 动态SQL
@@ -281,7 +281,7 @@ update subject
 为了节省篇幅，不展示完整的动态SQL。
 批量更新操作同样支持@UpdateProperty注解。
 
-上面例子中，id用于查询条件和更新属性，也可以使用@BatchUpdateKey指定该属性。
+上面例子中，id用于查询条件和更新属性的定位条件，也可以使用@BatchUpdateKey指定该属性。
 
 
 ### 删除
@@ -418,7 +418,8 @@ public interface SubjectMapper {
 ### @Param
 如果使用jdk8+，Mybatis3.5+, 并且使用'-parameters'编译代码，可以不用@Param注解标注参数（推荐使用这种方法）。
 否则必须要使用@Param标注参数名。
-注意：原来的Mybatis的#{param1}, #{param2}的默认参数名不可以使用。
+
+**注意：原来的Mybatis的#{param1}, #{param2}的默认参数名不可以使用。**
 
 ### 扩展
 SQLSessionFactoryBuilder.build方法的Properties参数可以传入用户定义的属性，Mybatis-Less从Properties中获取用户配置。
@@ -426,12 +427,12 @@ SQLSessionFactoryBuilder.build方法的Properties参数可以传入用户定义�
 ```java
 properties.put("mybatisLess.processor.methodPrefix.alter",  new AlterSQLBuilder());
 ```
-alter为方法前缀，AlterSQLBuilder需要实现SQLBuilder接口，构建动态SQL。
+alter为方法前缀，AlterSQLBuilder需要实现SQLBuilder接口，构建动态SQL。  
 默认SQLBuilder接口：
-UpdateSQLBuilder负责构建Update SQL，
-InsertSQLBuilder负责构建Insert SQL，
-SelectSQLBuilder负责构建Select SQL，
-DeleteSQLBuilder负责构建Delete SQL。
+* UpdateSQLBuilder负责构建Update SQL
+* InsertSQLBuilder负责构建Insert SQL
+* SelectSQLBuilder负责构建Select SQL
+* DeleteSQLBuilder负责构建Delete SQL
 
 ### 关闭驼峰转化下划线开关
 Mybatis-Less默认将实体属性的驼峰格式转化为表列的下划线格式，可以通过配置Mybatis.less.mapper.toUnderscore关闭。
