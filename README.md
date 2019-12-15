@@ -1,7 +1,8 @@
 # Mybatis-Less
 
-Mybatis-Less是一个基于Mybatis开发的插件，可以根据Mapper接口的方法注解自动生成动态SQL，同时支持使用Mybatis注解注入SQL，方便我们编写复杂SQL。  
-Mybatis-Less支持Mybatis-3.3及以上版本。
+Mybatis-Less是一个基于Mybatis开发的插件，支持Mybatis-3.3及以上版本。
+Mybatis-Less可以根据Mapper接口的方法注解自动生成动态SQL，同时支持使用Mybatis注解注入SQL，方便我们编写复杂SQL。  
+
 
 ## 特性
 
@@ -20,8 +21,8 @@ Mybatis-Less支持Mybatis-3.3及以上版本。
 ### 兼容Mybatis
 Mybatis-Less只是对Mybatis进行了功能扩展，不会影响Mybatis原有的功能和正常使用。
 
-Mybatis-Less完全兼容Mybatis的功能，一个Mapper接口中可以定义Mybatis-Less生成SQL方法，同时定义Mybatis注入SQL的方法，
-甚至Mybatis-Less生成SQL方法也可以使用Mybatis的@Options，@Results等注解。  
+Mybatis-Less完全兼容Mybatis的功能，一个Mapper接口中可以同时定义Mybatis-Less生成SQL的方法和Mybatis注入SQL的方法，
+甚至Mybatis-Less生成SQL的方法也可以使用Mybatis的@Options，@Results等注解。  
 这是现在Mybatis插件很少做到的。
 
 ### 实现简单，扩展性强
@@ -149,7 +150,7 @@ select * from subject
     id in <foreach collection='collection' item='item' open='(' close=') ' separator=','>#{item}</foreach>
 </where>
 ```
-**注意：参数名不必与属性名完成相同，但必须以字段名开头，如上例中的ids。**
+*注意：参数名不必与属性名完成相同，但必须以字段名开头，如上例中的ids。*
 
 #### 关系运算符
 查询条件中的关系运算符默认为=，集合参数的关系运算符默认为in，可以通过以下参数注解修改关系运算符
@@ -164,7 +165,7 @@ select * from subject
 | @Like    | like   |
 | @NotIn   | not in |
 
-**注意：关系运算符注解表示数据库列与查询参数的对比。如@Gt表示列大于查询参数。**
+*注意：关系运算符注解表示数据库列与查询参数的对比。如@Gt表示列大于查询参数。*
 
 使用关系运算符注解，按时间范围查询
 ```
@@ -222,7 +223,7 @@ select * from subject
 </where>
 group by author having sum(read_count) > #{readCountStart}
 ```
-**注意：用于having条件的参数不再生成where条件。**
+*注意：用于having条件的参数不再生成where条件。*
 
 ### 更新
 更新操作可以更新属性或者更新实体。
@@ -241,7 +242,7 @@ update subject
 	id= #{id}
 </where>
 ```
-**注意：必须遵循约定，用于查询的参数在前，用于更新的参数在后（参数必须以属性名开头），中间以@UpdateProperty分隔。**  
+*注意：必须遵循约定，用于查询的参数在前，用于更新的参数在后（参数必须以属性名开头），中间以@UpdateProperty分隔。*  
 @IgnoreNull注解表示该参数为null，则不更新该列。
 
 #### 更新实体
@@ -261,7 +262,7 @@ update subject
 </set>
 <where> id= #{id} </where>
 ```
-**注意：同样要遵循约定，用于查询的参数在前，用于更新的实体类参数在最后。**  
+*注意：同样要遵循约定，用于查询的参数在前，用于更新的实体类参数在最后。*  
 如果只更新一部分字段，可以使用UpdateProperty注解标示需更新的字段和ignoreNull的字段
 ```
 @UpdateProperty(value = "title,content", ignoreNullProperty = "content")
@@ -368,7 +369,7 @@ List<Subject> groupByAuthor(Date createTimeStart, int readCountStart);
 遵循约定，方法需提供参数pageNum，pageSize表示页码和每页数量，而且这两个参数必须位于方法参数最后两位。  
 如果只查询第一页数据，可以不提供pageNum参数，但pageSize参数必须提供。
 
-有两种方法分页
+有两种方法分页  
 1.使用pageNum，pageSize参数查询指定页码数据
 ```
 ---> java方法
@@ -388,11 +389,12 @@ List<Subject> pageById(@Gt long id, int pageSize);
 ---> 动态SQL
 select * from subject <where>id > #{id}</where> limit #{pageSize}
 ```
-**注意：pageNum从1开始。**
+*注意：pageNum从1开始。*
 
 ## 使用
 ### @TableMapping
-@TableMapping标明Mapper接口和数据表的对应关系，Mapper接口必须存在这注解，Mybatis-Less才为该Mapper接口的生成SQL。  
+@TableMapping标明Mapper接口和数据表的对应关系。  
+Mapper接口必须存在这注解，Mybatis-Less才为该Mapper接口的生成SQL。  
 其中tableName属性指定该Mapper接口对应的表名，不指定则使用Mapper接口名称转为下划线格式的字符串，  
 mappingClass属性指定表对于的实体类。
 
@@ -432,9 +434,9 @@ public interface SubjectMapper {
 
 
 ### @Param
-如果使用jdk8+，Mybatis3.5+, 并且使用`'-parameters'`编译代码，可以不用@Param注解标注参数（推荐使用这种方法）。  
+如果使用JDK8+，Mybatis-3.5+, 并且使用`'-parameters'`编译代码，可以不用@Param注解标注参数（推荐使用这种方法）。  
 否则必须要使用@Param标注参数名。  
-**注意：原来的Mybatis的#{param1}, #{param2}的默认参数名不可以使用。**
+*注意：原来的Mybatis的#{param1}, #{param2}的默认参数名不可以使用。*
 
 ### 兼容mybatis
 在一个Mapper接口中，可以同时定义Mybatis-Less生成SQL方法和Mybatis注入SQL的方法
