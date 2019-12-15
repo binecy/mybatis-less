@@ -1,6 +1,6 @@
 # Mybatis-Less
 
-Mybatis-Less是基于Mybatis开发的一个插件，可以根据Mapper接口的方法注解自动生成动态SQL，同时支持使用Mybatis注解注入SQL，方便我们编写复杂SQL。
+Mybatis-Less是一个基于Mybatis开发的插件，可以根据Mapper接口的方法注解自动生成动态SQL，同时支持使用Mybatis注解注入SQL，方便我们编写复杂SQL。  
 Mybatis-Less支持Mybatis-3.3及以上版本。
 
 ## 特性
@@ -20,8 +20,8 @@ Mybatis-Less支持Mybatis-3.3及以上版本。
 ### 兼容Mybatis
 Mybatis-Less只是对Mybatis进行了功能扩展，不会影响Mybatis原有的功能和正常使用。
 
-Mybatis-Less完全兼容Mybatis的功能，一个Mapper接口中可以定义使用Mybatis-Less生成SQL的方法，同时定义使用Mybatis注解注入SQL的方法，
-甚至Mybatis-Less方法也可以使用Mybatis的@Options，@Results等注解。  
+Mybatis-Less完全兼容Mybatis的功能，一个Mapper接口中可以定义Mybatis-Less生成SQL方法，同时定义Mybatis注入SQL的方法，
+甚至Mybatis-Less生成SQL方法也可以使用Mybatis的@Options，@Results等注解。  
 这是现在Mybatis插件很少做到的。
 
 ### 实现简单，扩展性强
@@ -432,9 +432,23 @@ public interface SubjectMapper {
 
 
 ### @Param
-如果使用jdk8+，Mybatis3.5+, 并且使用'-parameters'编译代码，可以不用@Param注解标注参数（推荐使用这种方法）。  
+如果使用jdk8+，Mybatis3.5+, 并且使用`'-parameters'`编译代码，可以不用@Param注解标注参数（推荐使用这种方法）。  
 否则必须要使用@Param标注参数名。  
 **注意：原来的Mybatis的#{param1}, #{param2}的默认参数名不可以使用。**
+
+### 兼容mybatis
+在一个Mapper接口中，可以同时定义Mybatis-Less生成SQL方法和Mybatis注入SQL的方法
+```java
+public interface SubjectMapper {
+    // Mybatis-Less生成sql
+    Subject selectById(long id);
+
+    // Mybatis注入SQL
+    @Select("select * from subject where id = #{id}")
+    Subject selectByMybatis(long id);
+}
+```
+如果使用了Mybatis注入SQL的注解(Select/Insert/Update/Delete/SelectProvider/InsertProvider/UpdateProvider/DeleteProvider)，Mybatis-Less则不会为该方法生成SQL。
 
 ### 扩展
 SQLSessionFactoryBuilder.build方法的Properties参数可以传入用户定义的属性，Mybatis-Less从该properties中获取用户配置。  
