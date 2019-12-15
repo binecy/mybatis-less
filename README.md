@@ -6,7 +6,7 @@ Mybatis-Less支持Mybatis-3.3及以上版本。
 ## 特性
 
 **为什么写这个插件**
-先说一下为什么写这个插件。  
+先说一下为什么写这个插件。
 我们喜欢Mybatis，因为它灵活，可以自行编写各种SQL，满足我们复杂的业务逻辑。
 但使用Mybatis，要编写很多简单的，重复的SQL。
 如果可以自动生成这些简单SQL，就可以减少大量不必要的工作。
@@ -100,6 +100,7 @@ Mybatis-Less根据接口方法名的前缀生成不同操作类型的动态SQL�
 ```
 ---> java方法
 Integer insertSubject(Subject subject);
+
 ---> 动态SQL
 insert into subject(id,title,content,author,read_count,create_time)
 values (#{id},#{title},#{content},#{author},#{readCount},#{createTime})
@@ -107,13 +108,13 @@ values (#{id},#{title},#{content},#{author},#{readCount},#{createTime})
 下面就是Mybatis-Less生成的动态SQL。
 
 Mybatis-Less支持与Mybatis的@Options注解共用，如果要使用mySQL的自增id，可以添加@Options注解
-```java
+```
 @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
 Integer insertSubject(Subject subject);
 ```
 
 如果我们只是想插入映射类中的部分字段，可以使用@InsertProperty注解标明需插入的字段
-```java
+```
 @InsertProperty("id,title,content")
 @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
 Integer insertSubject2(Subject subject);
@@ -132,6 +133,7 @@ Integer insertSubjects(List<Subject> subjects);
 ```
 ---> java方法
 Subject selectById(long id);
+
 ---> 动态SQL
 select * from subject <where>id= #{id}</where>
 ```
@@ -140,6 +142,7 @@ Mybatis-Less支持集合，数组参数查询
 ```
 ---> java方法
 List<Subject> selectByIds(List<Long> ids);
+
 ---> 动态SQL
 select * from subject
 <where>
@@ -167,6 +170,7 @@ select * from subject
 ```
 ---> java方法
 List<Subject> selectOnTime(@Gt Date cdtStart, @Lt Date cdtEnd);
+
 ---> 动态SQL
 select * from subject
 <where>
@@ -178,6 +182,7 @@ select * from subject
 ```
 ---> java方法
 List<Subject> selectLikeTitle(@Like("${title}%") String title);
+
 ---> 动态SQL
 select * from subject <where>title like '${title}%'</where>
 ```
@@ -187,6 +192,7 @@ select * from subject <where>title like '${title}%'</where>
 ```
 ---> java方法
 List<Subject> select(@IgnoreNull Long id, @IgnoreNull String title);
+
 ---> 动态SQL
 select * from subject
 <where>
@@ -208,6 +214,7 @@ desc为true表示倒序
 ```
 @Group(by = "author", having = "sum(read_count) > readCountStart")
 List<Subject> groupByAuthor(@Gt Date createTimeStart,@InHaving int readCountStart);
+
 ---> 动态SQL
 select * from subject
 <where>
@@ -223,12 +230,13 @@ group by author having sum(read_count) > #{readCountStart}
 ```
 ---> java方法
 int updateProperties(long id, @UpdateProperty @IgnoreNull String title, @IgnoreNull String content);
+
 ---> 动态SQL
 update subject
-	<set>
-		<if test='title != null'>title=#{title},</if>
-		<if test='content != null'>content=#{content}</if>
-	</set>
+<set>
+    <if test='title != null'>title=#{title},</if>
+    <if test='content != null'>content=#{content}</if>
+</set>
 <where>
 	id= #{id}
 </where>
@@ -240,17 +248,18 @@ update subject
 ```
 ---> java方法
 int updateSubject(long id, Subject subject);
+
 ---> 动态SQL
 update subject
-	<set>
-		id=#{subject.id},
-		title=#{subject.title},
-		content=#{subject.content},
-		author=#{subject.author},
-		read_count=#{subject.readCount},
-		create_time=#{subject.createTime}
-	</set>
-	<where> id= #{id} </where>
+<set>
+    id=#{subject.id},
+    title=#{subject.title},
+    content=#{subject.content},
+    author=#{subject.author},
+    read_count=#{subject.readCount},
+    create_time=#{subject.createTime}
+</set>
+<where> id= #{id} </where>
 ```
 **注意：同样要遵循约定，用于查询的参数在前，用于更新的实体类参数在最后。**
 如果只更新一部分字段，可以使用UpdateProperty注解标示需更新的字段和ignoreNull的字段
@@ -264,23 +273,23 @@ int updateSubject(long id, Subject subject);
 ```
 ---> java方法
 int updateSubjects(List<Subject> subjects);
+
 ---> 动态SQL
 update subject
-	<set>
-		id=<foreach collection='collection' item='subject' index='index' separator=' ' open='case id ' close=' end'>
-			when #{subject.id} then #{subject.id}
-		</foreach>,
-		...
-	</set>
-	<where>
-		id in  <foreach collection='collection' index='index' item='subject'   separator=',' open='(' close=')'>
-			#{subject.id}
-		</foreach>
-	</where>
+<set>
+    id=<foreach collection='collection' item='subject' index='index' separator=' ' open='case id ' close=' end'>
+        when #{subject.id} then #{subject.id}
+    </foreach>,
+    ...
+</set>
+<where>
+    id in  <foreach collection='collection' index='index' item='subject'   separator=',' open='(' close=')'>
+        #{subject.id}
+    </foreach>
+</where>
 ```
 为了节省篇幅，不展示完整的动态SQL。
 批量更新操作同样支持@UpdateProperty注解。
-
 上面例子中，id用于查询条件和更新属性的定位条件，也可以使用@BatchUpdateKey指定该属性。
 
 
@@ -289,6 +298,7 @@ update subject
 ```
 ---> java方法
 int deleteById(long id);
+
 ---> 动态SQL
 delete from subject <where> id= #{id} </where>
 ```
@@ -300,6 +310,7 @@ select操作和delete操作可以使用@Condition注解编写where条件，Mybat
 ---> java方法
 @Condition("id = #{id} or title like '${title}%'")
 List<Subject> selectByCond(Long id, String title);
+
 ---> 动态SQL
 select * from subject <where>id = #{id} or title like '${title}%'</where>
 ```
@@ -309,12 +320,13 @@ select * from subject <where>id = #{id} or title like '${title}%'</where>
 ---> java方法
 @Condition("id = #{id} or title like '${title}%'")
 List<Subject> selectByCond(@IgnoreNull Long id, @IgnoreNull String title);
+
 ---> 动态SQL
 select content,title,read_count,id,author,cdt,code from subject
-    <where>
-        <if test='id != null'>id = #{id}</if>
-        <if test='title != null'>or title like '${title}%'</if>
-    </where>
+<where>
+    <if test='id != null'>id = #{id}</if>
+    <if test='title != null'>or title like '${title}%'</if>
+</where>
 ```
 
 @Condition注解也同样支持数组，集合参数
@@ -322,6 +334,7 @@ select content,title,read_count,id,author,cdt,code from subject
 ---> java方法
 @Condition("id in #{ids} or author not in #{authors}")
 List<Subject> selectByCond2(List<Long> ids, List<String> author);
+
 ---> 动态SQL
 select content,title,read_count,id,author,cdt,code from subject
 <where>
@@ -336,6 +349,7 @@ select content,title,read_count,id,author,cdt,code from subject
 @Condition("create_time > #{createTimeStart}")
 @Group(by = "author", having = "sum(read_count) > #{readCountStart}")
 List<Subject> groupByAuthor(Date createTimeStart, int readCountStart);
+
 ---> 动态SQL
 select content,title,read_count,id,author,cdt,code from subject
 <where>
@@ -344,7 +358,7 @@ select content,title,read_count,id,author,cdt,code from subject
 group by author having sum(read_count) > #{readCountStart}
 ```
 也可以将order，group条件写入到@Condition条件中
-```java
+```
 @Condition("create_time > #{createTimeStart} group by author having sum(read_count) > #{readCountStart}")
 List<Subject> groupByAuthor(Date createTimeStart, int readCountStart);
 ```
@@ -359,6 +373,7 @@ List<Subject> groupByAuthor(Date createTimeStart, int readCountStart);
 ```
 ---> java方法
 List<Subject> page(int pageNum, int pageSize);
+
 ---> 动态SQL
 <bind name='pageOffset' value='(pageNum-1)*pageSize' />
 select * from subject  limit #{pageOffset}, #{pageSize}
@@ -369,6 +384,7 @@ select * from subject  limit #{pageOffset}, #{pageSize}
 ```
 ---> java方法
 List<Subject> pageById(@Gt long id, int pageSize);
+
 ---> 动态SQL
 select * from subject <where>id > #{id}</where> limit #{pageSize}
 ```
@@ -376,11 +392,11 @@ select * from subject <where>id > #{id}</where> limit #{pageSize}
 
 ## 使用
 ### @TableMapping
-@TableMapping标明一个Mapper接口和数据表的对应关系，只有Mapper接口存在这注解，Mybatis-Less才为该Mapper接口的生成SQL。
+@TableMapping标明Mapper接口和数据表的对应关系，Mapper接口必须存在这注解，Mybatis-Less才为该Mapper接口的生成SQL。
 其中tableName属性指定该Mapper接口对应的表名，不指定则使用Mapper接口名称转为下划线格式的字符串，
 mappingClass属性指定表对于的实体类。
 
-如果类属性名和表列名没有对应，可以使用columnMapping映射属性名和列名
+如果实体属性名和表列名没有对应，可以使用@columnMapping映射属性名和列名
 ```java
 @TableMapping(
         tableName = "subject",
@@ -421,12 +437,12 @@ public interface SubjectMapper {
 **注意：原来的Mybatis的#{param1}, #{param2}的默认参数名不可以使用。**
 
 ### 扩展
-SQLSessionFactoryBuilder.build方法的Properties参数可以传入用户定义的属性，Mybatis-Less从Properties中获取用户配置。
+SQLSessionFactoryBuilder.build方法的Properties参数可以传入用户定义的属性，Mybatis-Less从该properties中获取用户配置。
 如果开发者想添加方法前缀及SQL构建器，可以添加
 ```java
 properties.put("mybatisLess.processor.methodPrefix.alter",  new AlterSQLBuilder());
 ```
-alter为方法前缀，AlterSQLBuilder需要实现SQLBuilder接口，构建动态SQL。
+alter为方法前缀，AlterSQLBuilder需要实现SQLBuilder接口，构建动态SQL。  
 默认SQLBuilder接口：
 * UpdateSQLBuilder负责构建Update SQL
 * InsertSQLBuilder负责构建Insert SQL
