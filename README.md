@@ -1,6 +1,6 @@
 # Mybatis-Less
 
-Mybatis-Less是一个基于Mybatis开发的插件，支持Mybatis-3.3及以上版本。
+Mybatis-Less是一个基于Mybatis开发的插件，支持Mybatis-3.3及以上版本。  
 Mybatis-Less可以根据Mapper接口的方法注解自动生成动态SQL，同时支持使用Mybatis注解注入SQL，方便我们编写复杂SQL。  
 
 
