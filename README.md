@@ -1,43 +1,62 @@
 # Mybatis-Less
 
-Mybatis-Less是基于Mybatis开发的一个插件，可以根据Mapper接口的方法注解在应用启动时自动生成动态sql，同时支持使用Mybatis注解注入sql，方便我们编写复杂sql。
+Mybatis-Less是基于Mybatis开发的一个插件，可以根据Mapper接口的方法注解在应用启动时自动生成动态SQL，同时支持使用Mybatis注解注入SQL，方便我们编写复杂SQL。
 Mybatis-Less支持Mybatis-3.3及以上版本。
 
 ## 特性
 
 **为什么写这个插件**
-先说一下为什么写这个插件
-我们喜欢Mybatis，因为它灵活，可以自行编写各种sql，满足我们复杂的业务逻辑。
-但使用Mybatis，要编写很多简单的，重复的sql。
-如果可以自动生成这些简单sql，就可以大量减少我们不必要的工作了。
-同时我们还需要支持Mybatis注解注入sql方法，方便我们根据需要编写复杂sql。
+先说一下为什么写这个插件。
+我们喜欢Mybatis，因为它灵活，可以自行编写各种SQL，满足我们复杂的业务逻辑。
+但使用Mybatis，要编写很多简单的，重复的SQL。
+如果可以自动生成这些简单SQL，就可以减少大量不必要的工作。
+同时还需要支持使用Mybatis注解注入SQL的方法，方便我们根据需要编写复杂SQL。
 于是，Mybatis-Less就应运而生了。
 
 ### 入门简单
 基本上会使用Mybatis，就可以Mybatis-Less了。
-只是添加了几个简单的注解，就可以生成动态sql了，没有过多学习成本。
+只是添加了几个简单的注解，就可以生成动态SQL了，没有过多学习成本。
 
 ### 兼容Mybatis
-Mybatis-Less只是对Mybatis进行了功能扩展，不会影响Mybatis原有的功能，也不会影响Mybatis的正常使用。
+Mybatis-Less只是对Mybatis进行了功能扩展，不会影响Mybatis原有的功能和正常使用。
 
-Mybatis-Less完全兼容Mybatis的功能，一个Mapper接口中可以同时存在使用Mybatis-Less生成sql的方法和使用Mybatis注解注入sql的方法，
-甚至Mybatis-Less生成sql的方法也可以使用Mybatis的@Options，@Results等注解。
+Mybatis-Less完全兼容Mybatis的功能，一个Mapper接口中可以定义使用Mybatis-Less生成SQL的方法，同时定义使用Mybatis注解注入SQL的方法，
+甚至Mybatis-Less方法也可以使用Mybatis的@Options，@Results等注解。
 这是现在Mybatis插件很少做到的。
 
 ### 实现简单，扩展性强
 实现代码总共3000多行，非常简单，而且用户可以根据需要自行扩展。
 
-* [功能](#%E5%8A%9F%E8%83%BD)
-	* [插入](#%E6%8F%92%E5%85%A5)
-	* [查询](#%E6%9F%A5%E8%AF%A2)
-	* [更新](#%E6%9B%B4%E6%96%B0)
-	* [删除](#%E5%88%A0%E9%99%A4)
-	* [分页](#%E5%88%86%E9%A1%B5)
-* [使用方式](#%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F)
-* [特性](#%E7%89%B9%E6%80%A7)
+### 性能
+Mybatis-Less会在应用启动时生成动态SQL，不会对应用运行性能造成影响。
+
+* [功能](#功能)
+    * [方法前缀](#方法前缀)
+	* [插入](#插入)
+	    * [批量插入](#批量插入)
+	* [查询](#查询)
+	    * [关系运算符](#关系运算符)
+	    * [忽略NULL参数](#忽略NULL参数)
+	    * [排序](#排序)
+	    * [分组](#分组)
+	* [更新](#更新)
+	    * [更新属性](#更新属性)
+	    * [更新实体](#更新实体)
+	    * [批量更新](#批量更新)
+	* [删除](#删除)
+	* [Condition](#condition)
+	* [分页](#分页)
+* [使用](#使用)
+    * [@TableMapping](#@TableMapping)
+    * [启动LessSqlSessionFactoryBuilder}(#启动LessSqlSessionFactoryBuilder)
+    * [支持Spring-Boot](#支持Spring-Boot)
+    * [@Param](#@Param)
+    * [扩展](#扩展)
+    * [关闭驼峰转化下划线开关](#关闭驼峰转化下划线开关)
+    * [注解总结](#注解总结)
 
 ## 功能
-先看看Mybatis-Less的功能
+我们通过一个简单的例子来介绍Mybatis-Less的功能。
 
 定义一个实体映射类Subject
 ```java
@@ -53,7 +72,7 @@ public class Subject {
 }    
 ```
 对应的表结构
-```sql
+```SQL
 CREATE TABLE subject (
   id      INT NOT NULL primary key auto_increment,
   title   VARCHAR(64),
@@ -65,14 +84,14 @@ CREATE TABLE subject (
 ```
 
 ### 方法前缀
-Mybatis-Less根据接口方法名前缀生成不同操作类型的动态sql：
+Mybatis-Less根据接口方法名的前缀生成不同操作类型的动态SQL：
 
-|             方法前缀             | sql操作 |
+|             方法前缀             | SQL操作 |
 |----------------------------------|---------|
-| save,insert,add                  | insert  |
-| select,get,list,count,page,query,search | select  |
-| update,modify                    | update  |
-| delete,remove                    | delete  |
+| save,insert,add                  | 插入/批量插入  |
+| select,get,list,count,page,query,search | 查询  |
+| update,modify                    | 更新/批量更新  |
+| delete,remove                    | 删除  |
 | batchInsert                    | 批量插入  |
 | batchUpdate                    | 批量更新  |
 
@@ -81,13 +100,13 @@ Mybatis-Less根据接口方法名前缀生成不同操作类型的动态sql：
 ```
 ---> java方法
 Integer insertSubject(Subject subject);
----> 动态sql
+---> 动态SQL
 insert into subject(id,title,content,author,read_count,create_time)
 values (#{id},#{title},#{content},#{author},#{readCount},#{createTime})
 ```
-下面就是Mybatis-Less生成如下动态sql。
+下面就是Mybatis-Less生成的动态SQL。
 
-Mybatis-Less支持与Mybatis的@Options注解共用，所以如果要使用mysql的自增id，可以添加@Options注解
+Mybatis-Less支持与Mybatis的@Options注解共用，所以如果要使用mySQL的自增id，可以添加@Options注解
 ```java
 @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
 Integer insertSubject(Subject subject);
@@ -101,7 +120,7 @@ Integer insertSubject2(Subject subject);
 ```
 
 #### 批量插入
-*批量插入目前只支持mysql数据库*
+*批量插入目前只支持mySQL数据库*
 如果要批量插入数据，只需定义如下方法
 ```
 Integer insertSubjects(List<Subject> subjects);
@@ -113,7 +132,7 @@ Integer insertSubjects(List<Subject> subjects);
 ```
 ---> java方法
 Subject selectById(long id);
----> 动态sql
+---> 动态SQL
 select * from subject <where>id= #{id}</where>
 ```
 
@@ -121,11 +140,11 @@ Mybatis-Less支持集合，数组参数查询
 ```
 ---> java方法
 List<Subject> selectByIds(List<Long> ids);
----> 动态sql
+---> 动态SQL
 select * from subject
-	<where>
-		id in <foreach collection='collection' item='item' open='(' close=') ' separator=','>#{item}</foreach>
-	</where>
+<where>
+    id in <foreach collection='collection' item='item' open='(' close=') ' separator=','>#{item}</foreach>
+</where>
 ```
 注意：参数名不必与属性名完成相同，但必须以字段名开头，如上例中的ids。
 
@@ -142,25 +161,24 @@ select * from subject
 | @Like    | like   |
 | @NotIn   | not in |
 
-注意：关系运算符表示数据库列与查询参数的对比。如@Gt表示列大于查询参数。
+注意：以上的注解表示数据库列与查询参数的对比。如@Gt表示列大于查询参数。
 
 使用关系运算符注解，按时间范围查询
 ```
 ---> java方法
 List<Subject> selectOnTime(@Gt Date cdtStart, @Lt Date cdtEnd);
----> 动态sql
+---> 动态SQL
 select * from subject
-	<where>
-		create_time > #{createTimeStart} and create_time < #{createTimeEnd}
-	</where>
+<where>
+    create_time > #{createTimeStart} and create_time < #{createTimeEnd}
+</where>
 ```
 
-@Like支持使用Mybatis的${}格式占位符
-如查询以hello开头的主题
+@Like支持使用Mybatis的${}格式占位符，如查询以hello开头的主题
 ```
 ---> java方法
 List<Subject> selectLikeTitle(@Like("${title}%") String title);
----> 动态sql
+---> 动态SQL
 select * from subject <where>title like '${title}%'</where>
 ```
 
@@ -169,12 +187,12 @@ select * from subject <where>title like '${title}%'</where>
 ```
 ---> java方法
 List<Subject> select(@IgnoreNull Long id, @IgnoreNull String title);
----> 动态sql
+---> 动态SQL
 select * from subject
-	<where>
-		<if test='id != null'>id= #{id}</if>
-		<if test='title != null'> and title= #{title}</if>
-	</where>
+<where>
+    <if test='id != null'>id= #{id}</if>
+    <if test='title != null'> and title= #{title}</if>
+</where>
 ```
 
 #### 排序
@@ -190,22 +208,22 @@ desc为true表示倒序
 ```java
 @Group(by = "author", having = "sum(read_count) > readCountStart")
 List<Subject> groupByAuthor(@Gt Date createTimeStart,@InHaving int readCountStart);
----> 动态sql
+---> 动态SQL
 select * from subject
 <where>
 	create_time > #{createTimeStart}
 </where>
 group by author having sum(read_count) > #{readCountStart}
 ```
-注意：用于having条件的参数不会再用于生成where条件
+注意：用于having条件的参数不再生成where条件。
 
 ### 更新
-更新时可以更新属性或者更新实体。
-#### 更新指定的属性
+更新操作可以更新属性或者更新实体。
+#### 更新属性
 ```
 ---> java方法
 int updateProperties(long id, @UpdateProperty @IgnoreNull String title, @IgnoreNull String content);
----> 动态sql
+---> 动态SQL
 update subject
 	<set>
 		<if test='title != null'>title=#{title},</if>
@@ -222,7 +240,7 @@ update subject
 ```
 ---> java方法
 int updateSubject(long id, Subject subject);
----> 动态sql
+---> 动态SQL
 update subject
 	<set>
 		id=#{subject.id},
@@ -242,11 +260,11 @@ int updateSubject(long id, Subject subject);
 ```
 
 #### 批量更新
-*批量更新只支持mysql数据库，可以通过id或者唯一索引的字段进行批量更新操作。*
+*批量更新只支持mySQL数据库，可以通过id或者唯一索引的字段进行批量更新操作。*
 ```
 ---> java方法
 int updateSubjects(List<Subject> subjects);
----> 动态sql
+---> 动态SQL
 update subject
 	<set>
 		id=<foreach collection='collection' item='subject' index='index' separator=' ' open='case id ' close=' end'>
@@ -260,7 +278,7 @@ update subject
 		</foreach>
 	</where>
 ```
-为了节省篇幅，不展示完整的动态sql。
+为了节省篇幅，不展示完整的动态SQL。
 批量更新操作同样支持@UpdateProperty注解。
 
 上面例子中，id用于查询条件和更新属性，也可以使用@BatchUpdateKey指定该属性。
@@ -271,27 +289,27 @@ update subject
 ```
 ---> java方法
 int deleteById(long id);
----> 动态sql
+---> 动态SQL
 delete from subject <where> id= #{id} </where>
 ```
 delete操作比较简单，删除条件参数与select操作类似，这里不过多重复。
 
 ### @Condition
-select操作和delete操作可以使用@Condition注解编写where条件,Mybatis-Less会根据该条件生成动态sql
+select操作和delete操作可以使用@Condition注解编写where条件，Mybatis-Less会根据该条件生成动态SQL。
 ```
 ---> java方法
 @Condition("id = #{id} or title like '${title}%'")
 List<Subject> selectByCond(Long id, String title);
----> 动态sql
+---> 动态SQL
 select * from subject <where>id = #{id} or title like '${title}%'</where>
 ```
 
-支持@IgnoreNull注解与@Condition注解同时使用
+@Condition注解可以与@IgnoreNull注解同时使用
 ```
 ---> java方法
 @Condition("id = #{id} or title like '${title}%'")
 List<Subject> selectByCond(@IgnoreNull Long id, @IgnoreNull String title);
----> 动态sql
+---> 动态SQL
 select content,title,read_count,id,author,cdt,code from subject
     <where>
         <if test='id != null'>id = #{id}</if>
@@ -299,50 +317,49 @@ select content,title,read_count,id,author,cdt,code from subject
     </where>
 ```
 
-同样支持数组，集合参数
+@Condition注解也同样支持数组，集合参数
 ```
 ---> java方法
-@Condition("id = #{id} or author = #{author}")
+@Condition("id in #{ids} or author not in #{authors}")
 List<Subject> selectByCond2(List<Long> ids, List<String> author);
----> 动态sql
+---> 动态SQL
 select content,title,read_count,id,author,cdt,code from subject
 <where>
     id in <foreach collection='ids' item='item' open='(' close=') ' separator=','>#{item}</foreach>
-    or author in <foreach collection='author' item='item' open='(' close=') ' separator=','>#{item}</foreach>
+    or author not in <foreach collection='authors' item='item' open='(' close=') ' separator=','>#{item}</foreach>
 </where>
 ```
 
-支持使用@Order和@Group注解
+支持同时使用@Order和@Group注解
 ```
 ---> java方法
-@Condition("create_time &gt; #{createTimeStart}")
+@Condition("create_time > #{createTimeStart}")
 @Group(by = "author", having = "sum(read_count) > #{readCountStart}")
 List<Subject> groupByAuthor(Date createTimeStart, int readCountStart);
----> 动态sql
+---> 动态SQL
 select content,title,read_count,id,author,cdt,code from subject
 <where>
-    create_time &gt; #{createTimeStart}
+    create_time > #{createTimeStart}
 </where>
 group by author having sum(read_count) > #{readCountStart}
 ```
 也可以将order，group条件写入到@Condition条件中
 ```java
-@Condition("create_time &gt; #{createTimeStart} group by author having sum(read_count) > #{readCountStart}")
+@Condition("create_time > #{createTimeStart} group by author having sum(read_count) > #{readCountStart}")
 List<Subject> groupByAuthor(Date createTimeStart, int readCountStart);
 ```
 
 ### 分页
-**分页操作仅支持mysql数据库**
-遵循约定，方法参数pageNum，pageSize分别表示页码和每页数量，而且这两个参数必须位于方法参数最后两位。
+**分页操作仅支持mySQL数据库**
+遵循约定，方法需提供参数pageNum，pageSize表示页码和每页数量，而且这两个参数必须位于方法参数最后两位。
 如果只查询第一页数据，可以不提供pageNum参数，但pageSize参数必须提供。
-pageNum从1开始
 
 有两种方法分页
 1.使用pageNum，pageSize参数查询指定页码数据
 ```
 ---> java方法
 List<Subject> page(int pageNum, int pageSize);
----> 动态sql
+---> 动态SQL
 <bind name='pageOffset' value='(pageNum-1)*pageSize' />
 select * from subject  limit #{pageOffset}, #{pageSize}
 ```
@@ -352,13 +369,14 @@ select * from subject  limit #{pageOffset}, #{pageSize}
 ```
 ---> java方法
 List<Subject> pageById(@Gt long id, int pageSize);
----> 动态sql
-select * from subject <where>id &gt; #{id}</where> limit #{pageSize}
+---> 动态SQL
+select * from subject <where>id > #{id}</where> limit #{pageSize}
 ```
+注意：pageNum从1开始。
 
 ## 使用
 ### @TableMapping
-@TableMapping注解作用于Mapper接口，只有Mapper接口存在这注解，Mybatis-Less才为该Mapper接口的生成sql。
+@TableMapping标明一个Mapper接口和数据表的对应关系，只有Mapper接口存在这注解，Mybatis-Less才为该Mapper接口的生成SQL。
 其中tableName属性指定该Mapper接口对应的表名，不指定则使用Mapper接口名称转为下划线格式的字符串，
 mappingClass属性指定表对于的实体类。
 
@@ -375,53 +393,53 @@ public interface SubjectMapper {
 }
 ```
 
-### LessSqlSessionFactoryBuilder
-要使用Mybatis-Less，很简单，只要把SqlSessionFactoryBuilder换成LessSqlSessionFactoryBuilder就可以了
+### 启动LessSQLSessionFactoryBuilder
+要使用Mybatis-Less，很简单，只要把SQLSessionFactoryBuilder换成LessSQLSessionFactoryBuilder就可以了
 ```java
     Reader reader = Resources.getResourceAsReader("Mybatis-config.xml");
-    SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new LessSqlSessionFactoryBuilder();
-    SqlSessionFactory sqlSessionFactory =sqlSessionFactoryBuilder.build(reader);
+    SQLSessionFactoryBuilder SQLSessionFactoryBuilder = new LessSQLSessionFactoryBuilder();
+    SQLSessionFactory SQLSessionFactory =SQLSessionFactoryBuilder.build(reader);
 ```
 
 
-### springboot使用
-在springboot中使用Mybatis-Less，最简单配置如下
+### 支持Spring-Boot
+在Spring-Boot中使用Mybatis-Less，最简单配置如下
 ```java
     @Bean
-    public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
-        SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
-        factory.setSqlSessionFactoryBuilder(new LessSqlSessionFactoryBuilder());
+    public SQLSessionFactory SQLSessionFactory(DataSource dataSource) throws Exception {
+        SQLSessionFactoryBean factory = new SQLSessionFactoryBean();
+        factory.setSQLSessionFactoryBuilder(new LessSQLSessionFactoryBuilder());
         factory.setDataSource(dataSource);
         return factory.getObject();
     }
 ```
 
 
-#### @Param
-如果使用jdk8+，Mybatis3.5+, 并且使用'-parameters'编译代码，可以不用@Param注解标注参数，推荐使用这种方法。
-否则必须要使用@Param标注参数名，注意：原来的Mybatis的#{param1}, #{param2}的默认参数名已不可以使用。
+### @Param
+如果使用jdk8+，Mybatis3.5+, 并且使用'-parameters'编译代码，可以不用@Param注解标注参数（推荐使用这种方法）。
+否则必须要使用@Param标注参数名。
+注意：原来的Mybatis的#{param1}, #{param2}的默认参数名不可以使用。
 
 ### 扩展
-SqlSessionFactoryBuilder.build方法可以使用一个Properties传入自定义的参数，Mybatis-Less可以通过Properties定义自己的扩展。
-#### 扩展方法前缀
-如果开发者想添加方法前缀处理类，可以添加
+SQLSessionFactoryBuilder.build方法的Properties参数可以传入用户定义的属性，Mybatis-Less从Properties中获取用户配置。
+如果开发者想添加方法前缀及SQL构建器，可以添加
 ```java
-properties.put("mybatisLess.processor.methodPrefix.alter",  new AlterSqlBuilder());
+properties.put("mybatisLess.processor.methodPrefix.alter",  new AlterSQLBuilder());
 ```
-alter为方法前缀，AlterSqlBuilder需要实现SqlBuilder接口，生成动态sql。
-默认SqlBuilder接口：
-UpdateSqlBuilder负责生成Update sql，
-InsertSqlBuilder负责构建Insert sql，
-SelectSqlBuilder负责构建Select sql，
-DeleteSqlBuilder负责构建Delete sql，
+alter为方法前缀，AlterSQLBuilder需要实现SQLBuilder接口，构建动态SQL。
+默认SQLBuilder接口：
+UpdateSQLBuilder负责构建Update SQL，
+InsertSQLBuilder负责构建Insert SQL，
+SelectSQLBuilder负责构建Select SQL，
+DeleteSQLBuilder负责构建Delete SQL。
 
-#### 定义驼峰转化规则
-Mybatis-Less默认支持类属性名转化为表类名的下划线格式，通过配置Mybatis.less.mapper.toUnderscore关闭。
+### 关闭驼峰转化下划线开关
+Mybatis-Less默认将实体属性的驼峰格式转化为表列的下划线格式，可以通过配置Mybatis.less.mapper.toUnderscore关闭。
 ```
 properties.put("mybatisLess.mapping.toUnderLine", "false");
 ```
 
-### 注解使用
+### 注解总结
 注解总结如下
 
 | 注解           | 使用对象 |描述   |
@@ -432,7 +450,7 @@ properties.put("mybatisLess.mapping.toUnderLine", "false");
 | @UpdateProperty   | 方法     | 指定 update的字段,属性：ignoreNullProperty指定更新时忽略null的字段 |
 | @SelectProperty   | 方法     | 指定 select的字段 |
 | @BatchUpdateKey   | 方法     | 批量更新时，指定用于查询和更新的字段 |
-| @Condition | 方法 | 编写查询sql |
+| @Condition | 方法 | 编写查询SQL |
 | @IgnoreNull | 参数 | 如果该参数为null，不作为查询条件 |
 | @Gt | 参数 | 操作符 > |
 | @GtEq | 参数 | 操作符 >= |
