@@ -14,28 +14,47 @@ import java.util.List;
         ignoreProperty = {"classify"},
         columnMapping = {
                 @ColumnMapping(property = "createTime", column = "cdt")
-        })
+        }
+        )
 public interface SubjectMapper {
     // 插入
     @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
     Integer insertSubject(Subject subject);
 
-    @InsertProperty("id,code,title,author,readCount")
+    @InsertProperty(id="baseProperties", value = "id,code,title,author,readCount")
     @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
     Integer insertSubjectProperties(Subject subject);
+
+
+
+    @InsertProperty(id="baseProperties")
+    @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
+    Integer insertSubjectProperties2(Subject subject);
 
     // 批量插入
     @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
     Integer batchInsertSubject(List<Subject> subjects);
 
     @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
-    @InsertProperty("id,code,title,author,readCount")
+    @InsertProperty(id="baseProperties2", value = "id,code,title,author,readCount")
     Integer batchInsertSubjectProperties(List<Subject> subjects);
+
+    @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
+    @InsertProperty(id="baseProperties2")
+    Integer batchInsertSubjectProperties2(List<Subject> subjects);
 
     // 无参数查询
     List<Subject> listAll();
 
+
+
+    Subject getById(long id);
+
+    @SelectProperty(id = "listProperties", value = "id,code,title,author,readCount")
     Subject selectById(long id);
+
+    @SelectProperty(id = "listProperties")
+    Subject selectByCode(String code);
 
     @SelectProperty("code")
     String getCode(long id);
@@ -110,9 +129,11 @@ public interface SubjectMapper {
     @UpdateProperty(ignoreNullProperty = {"id","code","author","readCount"})
     int updateSubject(long id, Subject subject);
 
-    @UpdateProperty(value = "title,content",ignoreNullProperty = "title")
+    @UpdateProperty(id = "baseProperties", value = "title,content",ignoreNullProperty = "title")
     int updateSubject2(long id, Subject subject);
 
+    @UpdateProperty(id = "baseProperties")
+    int updateSubject3(String code, Subject subject);
 
     int updateSubjects(List<Subject> subjects);
 
@@ -125,7 +146,4 @@ public interface SubjectMapper {
 
     @Select("select * from subject where id = #{id}")
     Subject selectById2(long id);
-
-
-
 }

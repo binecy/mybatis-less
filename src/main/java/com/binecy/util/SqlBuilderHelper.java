@@ -5,6 +5,7 @@ import com.binecy.annotation.*;
 import com.binecy.builder.SqlBuilderContext;
 import org.apache.ibatis.annotations.Param;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -58,9 +59,9 @@ public class SqlBuilderHelper {
 
         column.setMultiValueParam(isCollection(param.getType()));
 
-        Like likeAnnotation = param.getAnnotation(Like.class);
-        if(likeAnnotation != null && likeAnnotation.value().length() > 0) {
-            column.setLikeVal(likeAnnotation.value());
+        Like likeAnt = param.getAnnotation(Like.class);
+        if(likeAnt != null && likeAnt.value().length() > 0) {
+            column.setLikeVal(likeAnt.value());
         }
         column.setRelationalOperator(getRelationalOperator(param));
         column.setIgnoreNull(param.getAnnotation(IgnoreNull.class)!=null);
@@ -117,6 +118,9 @@ public class SqlBuilderHelper {
 
     // 从annotation配置获取列信息
     public ColumnDesc[] getColumnFromAnnotationVal(String[] annotations, int paramIndex, SqlBuilderContext ctx) {
+        if(annotations == null)
+            return null;
+
         annotations = splitProperties(annotations);
 
         String paramName = null;
@@ -171,7 +175,8 @@ public class SqlBuilderHelper {
 
     // 过滤属性
     private Field[] filterProperty(Field[] properties, String[] ignoreProperties, String[] selectProperties) {
-        if(ignoreProperties == null || ignoreProperties.length == 0) {
+        if((ignoreProperties == null || ignoreProperties.length == 0)
+            && selectProperties == null) {
             return properties;
         }
 
@@ -266,4 +271,6 @@ public class SqlBuilderHelper {
     public void setToUnderLine(boolean toUnderLine) {
         isToUnderLine = toUnderLine;
     }
+
+
 }

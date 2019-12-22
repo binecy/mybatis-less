@@ -2,7 +2,6 @@ package com.binecy.builder;
 
 import com.binecy.annotation.InsertProperty;
 import com.binecy.util.ColumnDesc;
-import com.binecy.util.SqlBuilderHelper;
 import org.apache.ibatis.mapping.SqlCommandType;
 
 public class InsertSqlBuilder  implements SqlBuilder{
@@ -13,15 +12,13 @@ public class InsertSqlBuilder  implements SqlBuilder{
             return null;
         }
 
-        SqlBuilderHelper helper = ctx.getHelper();
-        String tableName = ctx.getTableName();
-
-        boolean isCollectionOpt = helper.isCollection(ctx.getMethod().getParameterTypes()[0]);
-
         ColumnDesc[] columnDesc = getColumnInfo(ctx);
+        if(columnDesc == null) {
+            return null;
+        }
 
         SqlContainer sqlContainer = new SqlContainer(ctx);
-
+        boolean isCollectionOpt = ctx.getHelper().isCollection(ctx.getMethod().getParameterTypes()[0]);
         if (isCollectionOpt) {
             return ctx.getBatchInsertSqlBuilder().buildSql(ctx);
         } else {
@@ -29,7 +26,7 @@ public class InsertSqlBuilder  implements SqlBuilder{
                 sqlContainer.addInsertColumnSql(info.getColumnName());
                 sqlContainer.addInsertValSql("#{" + info.getPropertyName() + "}");
             }
-            return sqlContainer.toInsertSql(tableName);
+            return sqlContainer.toInsertSql(ctx.getTableName());
         }
     }
 
@@ -39,10 +36,15 @@ public class InsertSqlBuilder  implements SqlBuilder{
     }
 
     public ColumnDesc[] getColumnInfo(SqlBuilderContext ctx) {
-        ColumnDesc[] columnMetadata;
-        InsertProperty insertPropertyAnnotation = ctx.getMethod().getAnnotation(InsertProperty.class);
-        if(insertPropertyAnnotation != null) {
-            columnMetadata = ctx.getHelper().getColumnFromAnnotationVal(insertPropertyAnnotation.value(), 0, ctx);
+        ColumnDesc[] columnMetadata = null;
+        InsertProperty insertPropertyAnt = ctx.getMethod().getAnnotation(InsertProperty.class);
+        if(insertPropertyAnt != null) {
+            if(insertPropertyAnt.value().length > 0) {
+                columnMetadata = ctx.getHelper().getColumnFromAnnotationVal(insertPropertyAnt.value(), 0, ctx);
+            } else if(insertPropertyAnt.id().length() > 0) {
+                String[] properties = ctx.getInsertPropertyById(insertPropertyAnt.id()).value();
+                columnMetadata = ctx.getHelper().getColumnFromAnnotationVal(properties, 0, ctx);
+            }
         } else {
             columnMetadata = ctx.getHelper().getColumnFromProperty(0, ctx);
         }

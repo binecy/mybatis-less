@@ -15,10 +15,10 @@ public class GroupBySqlBuilder implements SqlBuilder {
             return null;
         }
 
-        Group groupAnnotation = ctx.getMethod().getAnnotation(Group.class);
-        String s = "group by " + groupAnnotation.by();
-        if(!"".equals(groupAnnotation.having())) {
-            s += " having " + groupAnnotation.having();
+        Group groupAnt = ctx.getMethod().getAnnotation(Group.class);
+        String s = "group by " + groupAnt.by();
+        if(!"".equals(groupAnt.having())) {
+            s += " having " + groupAnt.having();
         }
 
         ctx.getSqlContainer().setGroupBySql(s);

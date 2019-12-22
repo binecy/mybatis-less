@@ -33,7 +33,7 @@ public class LessMapperRegistry extends MapperRegistry {
             CtClass cc = pool.get("org.apache.ibatis.builder.annotation.MapperAnnotationBuilder");
 
             // 添加字段LessMapperBuilderPlus
-            CtField f = new CtField(pool.get("com.binecy.LessMapperBuilderPlus"), "lessMapperBuilderPlus", cc);
+            CtField f = new CtField(pool.get("com.binecy.LessMapperBuilder"), "lessMapperBuilderPlus", cc);
             cc.addField(f);
 
             // getSqlSourceFromAnnotations方法前添加逻辑
@@ -117,7 +117,7 @@ public class LessMapperRegistry extends MapperRegistry {
                 MapperAnnotationBuilder mapperAnnotationBuilder = (MapperAnnotationBuilder) constructor.newInstance(config, type);
 
                 // 新增逻辑
-                LessMapperBuilderPlus builderPlus = new LessMapperBuilderPlus(config, type, methodPreAndSqlBuilderMapper);
+                LessMapperBuilder builderPlus = new LessMapperBuilder(config, type, methodPreAndSqlBuilderMapper);
                 Field f = builderClass.getDeclaredField("lessMapperBuilderPlus");
                 f.setAccessible(true);
                 f.set(mapperAnnotationBuilder, builderPlus);

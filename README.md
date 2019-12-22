@@ -24,6 +24,8 @@ Mybatis-Less只是对Mybatis进行了功能扩展，不会影响Mybatis原有的
 Mybatis-Less完全兼容Mybatis的功能，一个Mapper接口中可以同时定义Mybatis-Less生成SQL的方法和Mybatis注入SQL的方法，
 甚至Mybatis-Less生成SQL的方法也可以使用Mybatis的@Options，@Results等注解。  
 这是现在Mybatis插件很少做到的。
+现在的Mybatis插件一般为每个Mapper接口生成一套CRUD代码，这样会造成代码冗余，
+又或者提供一个固定的CRUD的底层实际接口，不够灵活，而且与Mybatis原来使用的方法差异较大，造成过多的学习成本。
 
 ### 实现简单，扩展性强
 实现代码总共3000多行，非常简单，而且用户可以根据需要自行扩展。
@@ -45,6 +47,7 @@ Mybatis-Less会在应用启动时生成动态SQL，不会对应用运行性能�
 	    * [更新实体](#更新实体)
 	    * [批量更新](#批量更新)
 	* [删除](#删除)
+	* [注解复用](#注解复用)
 	* [Condition](#condition)
 	* [分页](#分页)
 * [使用](#使用)
@@ -306,6 +309,25 @@ delete from subject <where> id= #{id} </where>
 ```
 delete操作比较简单，删除条件参数与select操作类似，这里不过多重复。
 
+### 注解复用
+SelectProperty，UpdateProperty，InsertProperty这些注解是可以复用的。当这些注解只要id值时，Mybatis-Less会查找该Mapper接口中id值相同，存在value值的注解，并使用该value值生成动态SQL。
+```
+---> java方法
+@SelectProperty(id = "listProperties", value = "id,code,title,author,readCount")
+Subject selectById(long id);
+
+@SelectProperty(id = "listProperties")
+Subject selectByCode(String code);
+
+---> 动态sql
+select id,code,title,author,read_count from subject <where>id=#{id}</where>
+select id,code,title,author,read_count from subject <where>code=#{code}</where>
+```
+selectByCode方法会使用selectById方法的SelectProperty注解。  
+只能复用同种类型的注解，即SelectProperty注解只能复用SelectProperty注解，其他注解也一样。  
+* 注意：UpdateProperty注解会复用属性。*
+
+
 ### @Condition
 select操作和delete操作可以使用@Condition注解编写where条件，Mybatis-Less会根据该条件生成动态SQL。
 ```
@@ -479,9 +501,9 @@ properties.put("mybatisLess.mapping.toUnderLine", "false");
 |--|--|--|
 | @TableMapping  | 类       | Mybatis-Less的标示注解，属性：TableMapping指定映射类，tableName指定表名，columnMapping指定列和属性的映射 |
 | @ColumnMapping |          | 指定单一表列名和类字段名的映射  |
-| @InsertProperty   | 方法     | 指定insert的字段 |
-| @UpdateProperty   | 方法     | 指定 update的字段,属性：ignoreNullProperty指定更新时忽略null的字段 |
-| @SelectProperty   | 方法     | 指定 select的字段 |
+| @InsertProperty   | 方法     | 指定insert的字段，属性：id用于注解复用|
+| @UpdateProperty   | 方法     | 指定 update的字段,属性：id用于注解复用，ignoreNullProperty指定更新时忽略null的字段 |
+| @SelectProperty   | 方法     | 指定 select的字段，属性：id用于注解复用 |
 | @BatchUpdateKey   | 方法     | 批量更新时，指定用于查询和更新的字段 |
 | @Condition | 方法 | 编写查询SQL |
 | @IgnoreNull | 参数 | 如果该参数为null，不作为查询条件 |

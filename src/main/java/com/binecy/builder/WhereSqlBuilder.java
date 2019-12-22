@@ -16,13 +16,13 @@ public class WhereSqlBuilder implements SqlBuilder {
     public String buildSql(SqlBuilderContext ctx) {
         Method method = ctx.getMethod();
 
-        Condition conditionAnnotation = method.getAnnotation(Condition.class);
-        if (conditionAnnotation == null) {
+        Condition conditionAnt = method.getAnnotation(Condition.class);
+        if (conditionAnt == null) {
             ColumnDesc[] columnDesc = filterParam(ctx);
             generateWhereSql(columnDesc, ctx);
         } else {
             // 在condition中写了order by或group by要移到context
-            String whereSql = extractGroupOrderSql(conditionAnnotation.value().trim(), ctx);
+            String whereSql = extractGroupOrderSql(conditionAnt.value().trim(), ctx);
 
             ColumnDesc[] columnDesc = filterParam(ctx);
             String enhanceWhereSql = enhanceWhereSql(columnDesc,whereSql, ctx);
@@ -48,9 +48,9 @@ public class WhereSqlBuilder implements SqlBuilder {
         // 过滤having语句中的参数
         String groupSql = ctx.getSqlContainer().getGroupBySql();
         if(groupSql == null) {
-            Group groupAnnotation = ctx.getMethod().getAnnotation(Group.class);
-            if(groupAnnotation != null) {
-                groupSql = groupAnnotation.having();
+            Group groupAnt = ctx.getMethod().getAnnotation(Group.class);
+            if(groupAnt != null) {
+                groupSql = groupAnt.having();
             }
         }
 

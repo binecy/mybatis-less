@@ -6,6 +6,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER, ElementType.METHOD})
 public @interface UpdateProperty {
+    String id() default "";
     String[] value() default {};
     String[] ignoreNullProperty() default {};
 }

@@ -26,7 +26,6 @@ public class Subject {
     private Integer readCount;
     private Date createTime;
     private String classify;
-
     public Long getId() {
         return id;
     }

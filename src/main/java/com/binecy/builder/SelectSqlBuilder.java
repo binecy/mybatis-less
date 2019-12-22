@@ -3,7 +3,6 @@ package com.binecy.builder;
 
 import com.binecy.annotation.SelectProperty;
 import com.binecy.util.ColumnDesc;
-import com.binecy.util.SqlBuilderHelper;
 import org.apache.ibatis.mapping.SqlCommandType;
 
 import java.lang.reflect.Method;
@@ -12,8 +11,9 @@ public class SelectSqlBuilder implements SqlBuilder {
 
     @Override
     public String buildSql(SqlBuilderContext ctx) {
-        String tableName = ctx.getTableName();
         ColumnDesc[] columnDesc = getColumnDesc(ctx);
+        if(columnDesc == null)
+            return null;
 
         SqlContainer sqlContainer = new SqlContainer(ctx);
         if(columnDesc != null) {
@@ -26,17 +26,22 @@ public class SelectSqlBuilder implements SqlBuilder {
         ctx.getGroupBySqlBuilder().buildSql(ctx);
         ctx.getOrderBySqlBuilder().buildSql(ctx);
 
-        return sqlContainer.toSelectSql(tableName);
+        return sqlContainer.toSelectSql(ctx.getTableName());
     }
 
     private ColumnDesc[] getColumnDesc(SqlBuilderContext ctx) {
         Method method = ctx.getMethod();
-        SelectProperty selectPropertyAnnotation = method.getAnnotation(SelectProperty.class);
+        SelectProperty selectPropertyAnt = method.getAnnotation(SelectProperty.class);
 
         ColumnDesc[] columnDesc = null;
-        if (selectPropertyAnnotation != null ) {
-            columnDesc = ctx.getHelper().getColumnFromAnnotationVal(selectPropertyAnnotation.value(), -1, ctx);
-        } else if(ctx.getIgnoreProperties() != null || ctx.getIgnoreProperties().length >= 0){
+        if (selectPropertyAnt != null ) {
+            if(selectPropertyAnt.value().length > 0) {
+                columnDesc = ctx.getHelper().getColumnFromAnnotationVal(selectPropertyAnt.value(), -1, ctx);
+            } else if(selectPropertyAnt.id().length() > 0){
+                String[] properties = ctx.getSelectPropertyById(selectPropertyAnt.id()).value();
+                columnDesc = ctx.getHelper().getColumnFromAnnotationVal(properties, -1, ctx);
+            }
+        } else {
             columnDesc = ctx.getHelper().getColumnFromProperty(-1, ctx);
         }
         return columnDesc;

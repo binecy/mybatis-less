@@ -1,7 +1,6 @@
 package com.binecy;
 
-import com.binecy.annotation.ColumnMapping;
-import com.binecy.annotation.TableMapping;
+import com.binecy.annotation.*;
 import com.binecy.builder.GroupBySqlBuilder;
 import com.binecy.builder.OrderBySqlBuilder;
 import com.binecy.builder.SqlBuilder;
@@ -19,12 +18,12 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 
-public class LessMapperBuilderPlus {
+public class LessMapperBuilder {
     private final Configuration configuration;
     private final Class<?> type;
     private Map<String, SqlBuilder> methodPreAndSqlBuilderMapper;
     private static final Set<Class<? extends Annotation>> MYBATIS_ANNOTATION_TYPES = new HashSet<>();
-    private static final Log log = LogFactory.getLog(LessMapperBuilderPlus.class);
+    private static final Log log = LogFactory.getLog(LessMapperBuilder.class);
 
     private static final String UNDERLINE_CONFIG = "mybatisLess.mapping.toUnderLine";
     static {
@@ -40,7 +39,7 @@ public class LessMapperBuilderPlus {
         MYBATIS_ANNOTATION_TYPES.add(DeleteProvider.class);
     }
 
-    public LessMapperBuilderPlus(Configuration configuration, Class<?> type, Map<String, SqlBuilder> methodPreAndSqlBuilderMapper) {
+    public LessMapperBuilder(Configuration configuration, Class<?> type, Map<String, SqlBuilder> methodPreAndSqlBuilderMapper) {
         this.configuration = configuration;
         this.type = type;
         this.methodPreAndSqlBuilderMapper = methodPreAndSqlBuilderMapper;
@@ -78,7 +77,7 @@ public class LessMapperBuilderPlus {
             return null;
         }
 
-        TableMapping tableMappingAnnotation = type.getAnnotation(TableMapping.class);
+        TableMapping tableMappingAnt = type.getAnnotation(TableMapping.class);
         SqlBuilderContext ctx = new SqlBuilderContext();
 
         ctx.setWhereSqlBuilder(methodPreAndSqlBuilderMapper.get("where"));
@@ -90,7 +89,7 @@ public class LessMapperBuilderPlus {
 
         ctx.setBelongInterface(type);
         ctx.setMethod(method);
-        ctx.setMappingClass(tableMappingAnnotation.mappingClass());
+        ctx.setMappingClass(tableMappingAnt.mappingClass());
 
         SqlBuilderHelper helper = new SqlBuilderHelper();
         ctx.setHelper(helper);
@@ -102,18 +101,20 @@ public class LessMapperBuilderPlus {
             helper.setToUnderLine(true);
         }
         // 表名
-        if (tableMappingAnnotation.tableName().length() > 0) {
-            ctx.setTableName(tableMappingAnnotation.tableName());
+        if (tableMappingAnt.tableName().length() > 0) {
+            ctx.setTableName(tableMappingAnt.tableName());
         } else {
-            ctx.setTableName(helper.toUnderLineIfNeed(tableMappingAnnotation.mappingClass().getSimpleName()));
+            ctx.setTableName(helper.toUnderLineIfNeed(tableMappingAnt.mappingClass().getSimpleName()));
         }
 
         // 设置属性和列名映射
-        setColumnMapping(tableMappingAnnotation, ctx);
+        setColumnMapping(tableMappingAnt, ctx);
         // 设置参数信息
         setParamInfo(method, ctx);
         // 设置忽略的类属性
-        setIgnoreProperties(tableMappingAnnotation, ctx);
+        setIgnoreProperties(tableMappingAnt, ctx);
+        // 设置property注解和id的对应
+        setIdToProperty(type, ctx);
 
         try {
             String sqlStr = sqlBuilder.buildSql(ctx);
@@ -143,6 +144,36 @@ public class LessMapperBuilderPlus {
     private void setIgnoreProperties(TableMapping classMapperAnnotation,SqlBuilderContext ctx) {
         String[]  ignoreProperties = ctx.getHelper().splitProperties(classMapperAnnotation.ignoreProperty());
         ctx.setIgnoreProperties(ignoreProperties);
+    }
+
+    private void setIdToProperty(Class type, SqlBuilderContext ctx) {
+        Map<String, InsertProperty> idToInsertProperty = new HashMap<>();
+        Map<String, SelectProperty> idToSelectProperty = new HashMap<>();
+        Map<String, UpdateProperty> idToUpdateProperty = new HashMap<>();
+
+        for (Method method : type.getMethods()) {
+            InsertProperty insertProperty = method.getAnnotation(InsertProperty.class);
+            if(insertProperty != null &&
+                    insertProperty.id().length() > 0 && insertProperty.value().length > 0) {
+                idToInsertProperty.put(insertProperty.id(), insertProperty);
+            }
+
+            SelectProperty selectProperty = method.getAnnotation(SelectProperty.class);
+            if(selectProperty != null &&
+                selectProperty.id().length() > 0 && selectProperty.value().length > 0) {
+                idToSelectProperty.put(selectProperty.id(), selectProperty);
+            }
+
+            UpdateProperty updateProperty = method.getAnnotation(UpdateProperty.class);
+            if(updateProperty != null &&
+                updateProperty.id().length() > 0 && updateProperty.value().length > 0) {
+                idToUpdateProperty.put(updateProperty.id(), updateProperty);
+            }
+        }
+
+        ctx.setIdToInsertProperty(idToInsertProperty);
+        ctx.setIdToUpdateProperty(idToUpdateProperty);
+        ctx.setIdToSelectProperty(idToSelectProperty);
     }
 
     private void setParamInfo(Method method, SqlBuilderContext context) {

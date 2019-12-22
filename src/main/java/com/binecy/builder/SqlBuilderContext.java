@@ -1,9 +1,13 @@
 package com.binecy.builder;
 
+import com.binecy.annotation.InsertProperty;
+import com.binecy.annotation.SelectProperty;
+import com.binecy.annotation.UpdateProperty;
 import com.binecy.util.Parameter;
 import com.binecy.util.SqlBuilderHelper;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 
 public class SqlBuilderContext {
@@ -26,6 +30,10 @@ public class SqlBuilderContext {
     private SqlBuilder orderBySqlBuilder;
     private SqlBuilder groupBySqlBuilder;
     private SqlBuilder selectSqlBuilder;
+
+    Map<String, InsertProperty> idToInsertProperty = new HashMap<>();
+    Map<String, SelectProperty> idToSelectProperty = new HashMap<>();
+    Map<String, UpdateProperty> idToUpdateProperty = new HashMap<>();
 
 
     public SqlBuilder getOrderBySqlBuilder() {
@@ -170,5 +178,29 @@ public class SqlBuilderContext {
 
     public void setSelectSqlBuilder(SqlBuilder selectSqlBuilder) {
         this.selectSqlBuilder = selectSqlBuilder;
+    }
+
+    public void setIdToInsertProperty(Map<String, InsertProperty> idToInsertProperty) {
+        this.idToInsertProperty = idToInsertProperty;
+    }
+
+    public void setIdToSelectProperty(Map<String, SelectProperty> idToSelectProperty) {
+        this.idToSelectProperty = idToSelectProperty;
+    }
+
+    public void setIdToUpdateProperty(Map<String, UpdateProperty> idToUpdateProperty) {
+        this.idToUpdateProperty = idToUpdateProperty;
+    }
+
+    public InsertProperty getInsertPropertyById(String id) {
+        return idToInsertProperty.get(id);
+    }
+
+    public UpdateProperty getUpdatePropertyById(String id) {
+        return idToUpdateProperty.get(id);
+    }
+
+    public SelectProperty getSelectPropertyById(String id) {
+        return idToSelectProperty.get(id);
     }
 }

@@ -20,10 +20,10 @@ public class BatchUpdateSqlBuilder implements SqlBuilder{
         Class<?> actType = ctx.getMappingClass();
         String className = ReflectUtil.getClassName(actType);
 
-        UpdateProperty updatePropertyAnnotation = method.getAnnotation(UpdateProperty.class);
+        UpdateProperty updatePropertyAnt = method.getAnnotation(UpdateProperty.class);
         String[] selectProperties = null;
-        if(updatePropertyAnnotation != null && updatePropertyAnnotation.value().length > 0) {
-            selectProperties = helper.splitProperties(updatePropertyAnnotation.value());
+        if(updatePropertyAnt != null && updatePropertyAnt.value().length > 0) {
+            selectProperties = helper.splitProperties(updatePropertyAnt.value());
         }
 
 

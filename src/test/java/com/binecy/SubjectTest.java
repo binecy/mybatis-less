@@ -58,8 +58,12 @@ public class SubjectTest {
                 assertNotNull(subject.getId());
             }
 
-            for(int i = 6; i <= 10; i++)
+            for(int i = 6; i <= 8; i++)
                 mapper.insertSubjectProperties(createSubject(i));
+
+            for(int i = 9; i <= 10; i++)
+                mapper.insertSubjectProperties2(createSubject(i));
+
 
             List<Subject> subjects = new ArrayList<>();
             for(int i = 11; i <= 15; i++) {
@@ -67,11 +71,19 @@ public class SubjectTest {
             }
             mapper.batchInsertSubject(subjects);
 
+
             subjects = new ArrayList<>();
-            for(int i = 16; i <= 20; i++) {
+            for(int i = 16; i <= 18; i++) {
                 subjects.add(createSubject(i));
             }
             mapper.batchInsertSubjectProperties(subjects);
+            assertNotNull(subjects.get(0).getId());
+
+            subjects = new ArrayList<>();
+            for(int i = 19; i <= 20; i++) {
+                subjects.add(createSubject(i));
+            }
+            mapper.batchInsertSubjectProperties2(subjects);
             assertNotNull(subjects.get(0).getId());
 
             sqlSession.commit();
@@ -90,6 +102,11 @@ public class SubjectTest {
 
             Subject s = mapper.selectById(first.getId());
             assertEquals(s.getTitle(), first.getTitle());
+            assertEquals(s.getContent(), null);
+
+            s = mapper.selectByCode(first.getCode());
+            assertEquals(s.getTitle(), first.getTitle());
+            assertEquals(s.getContent(), null);
 
             String c = mapper.getCode(first.getId());
             assertEquals(first.getCode() , c);
@@ -240,7 +257,7 @@ public class SubjectTest {
             mapper.updateFields(first.getId(), "new title", null);
             mapper.updateFields(first.getId(), null, "new context");
 
-            Subject newFirst = mapper.selectById(first.getId());
+            Subject newFirst = mapper.getById(first.getId());
             assertTrue(newFirst.getTitle().equals("new title"));
             assertTrue(newFirst.getContent().equals("new context"));
 
@@ -248,7 +265,7 @@ public class SubjectTest {
             updateTo.setTitle("new title2");
             updateTo.setContent("new context2");
             mapper.updateSubject(first.getId(), updateTo);
-            newFirst = mapper.selectById(first.getId());
+            newFirst = mapper.getById(first.getId());
             assertTrue(newFirst.getTitle().equals("new title2"));
             assertTrue(newFirst.getContent().equals("new context2"));
             assertTrue(newFirst.getReadCount()== first.getReadCount());
@@ -259,17 +276,26 @@ public class SubjectTest {
             updateTo.setContent("new context3");
             updateTo.setReadCount(1000);
             mapper.updateSubject2(first.getId(), updateTo);
-            newFirst = mapper.selectById(first.getId());
+            newFirst = mapper.getById(first.getId());
             assertTrue(newFirst.getTitle().equals("new title3"));
             assertTrue(newFirst.getContent().equals("new context3"));
             assertTrue(newFirst.getReadCount()== first.getReadCount());
 
 
+            updateTo = new Subject();
+            updateTo.setContent("new context7");
+            updateTo.setReadCount(1000);
+            mapper.updateSubject3(first.getCode(), updateTo);
+            newFirst = mapper.getById(first.getId());
+            assertTrue(newFirst.getTitle().equals("new title3"));
+            assertTrue(newFirst.getContent().equals("new context7"));
+            assertTrue(newFirst.getReadCount()== first.getReadCount());
+
             List<Subject> updates = all.subList(1, 3);
             updates.get(0).setTitle("new title4");
             updates.get(1).setTitle("new title4");
             mapper.updateSubjects(updates);
-            newFirst = mapper.selectById(all.get(1).getId());
+            newFirst = mapper.getById(all.get(1).getId());
             assertTrue(newFirst.getTitle().equals("new title4"));
             assertTrue(newFirst.getContent().equals(all.get(1).getContent()));
 
@@ -280,12 +306,12 @@ public class SubjectTest {
             updates.get(0).setContent("new context5");
             updates.get(1).setContent("new context5");
             mapper.updateSubjects2(updates);
-            newFirst = mapper.selectById(all.get(3).getId());
+            newFirst = mapper.getById(all.get(3).getId());
             assertTrue(newFirst.getTitle().equals("new title5"));
             assertTrue(newFirst.getContent().equals(beforeContent));
 
             mapper.updateFields2("new title6");
-            newFirst = mapper.selectById(first.getId());
+            newFirst = mapper.getById(first.getId());
             assertTrue(newFirst.getTitle().equals("new title6"));
         }
     }

@@ -13,8 +13,10 @@ public class BatchInsertSqlBuilder implements SqlBuilder {
             return null;
         }
 
-        String tableName = ctx.getTableName();
         ColumnDesc[] columnDesc = getColumnInfo(ctx);
+        if(columnDesc == null) {
+            return null;
+        }
         BatchSqlContainer sqlContainer = new BatchSqlContainer(ctx);
 
         Class<?> actClass = ctx.getMappingClass();
@@ -25,7 +27,7 @@ public class BatchInsertSqlBuilder implements SqlBuilder {
             sqlContainer.addInsertValSql("#{" + className + "." + column.getPropertyName() + "}");
         }
 
-        return sqlContainer.toBatchInsertSql(tableName, columnDesc[0].getParamName(), ReflectUtil.getClassName(ctx.getMappingClass()));
+        return sqlContainer.toBatchInsertSql(ctx.getTableName(), columnDesc[0].getParamName(), ReflectUtil.getClassName(ctx.getMappingClass()));
     }
 
     @Override
@@ -34,10 +36,15 @@ public class BatchInsertSqlBuilder implements SqlBuilder {
     }
 
     private ColumnDesc[] getColumnInfo(SqlBuilderContext ctx) {
-        ColumnDesc[] columnMetadata;
-        InsertProperty insertPropertyAnnotation = ctx.getMethod().getAnnotation(InsertProperty.class);
-        if(insertPropertyAnnotation != null) {
-            columnMetadata = ctx.getHelper().getColumnFromAnnotationVal(insertPropertyAnnotation.value(), 0, ctx);
+        ColumnDesc[] columnMetadata = null;
+        InsertProperty insertPropertyAnt = ctx.getMethod().getAnnotation(InsertProperty.class);
+        if(insertPropertyAnt != null) {
+            if(insertPropertyAnt.value().length > 0) {
+                columnMetadata = ctx.getHelper().getColumnFromAnnotationVal(insertPropertyAnt.value(), 0, ctx);
+            } else if(insertPropertyAnt.id().length() > 0) {
+                String[] properties = ctx.getInsertPropertyById(insertPropertyAnt.id()).value();
+                columnMetadata = ctx.getHelper().getColumnFromAnnotationVal(properties, 0, ctx);
+            }
         } else {
             columnMetadata = ctx.getHelper().getColumnFromProperty(0, ctx);
         }

@@ -6,5 +6,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface SelectProperty {
-  String[] value();
+  String[] value() default {};
+  String id() default "";
 }

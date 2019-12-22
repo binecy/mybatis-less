@@ -81,14 +81,21 @@ public class UpdateSqlBuilder implements SqlBuilder {
         Method method = ctx.getMethod();
         Parameter[] parameters = ctx.getParamInfo();
 
-        UpdateProperty updatePropertyAnnotation = method.getAnnotation(UpdateProperty.class);
+        UpdateProperty updatePropertyAnt = method.getAnnotation(UpdateProperty.class);
+        if(updatePropertyAnt.value().length == 0 && updatePropertyAnt.id().length() > 0) {
+            updatePropertyAnt = ctx.getUpdatePropertyById(updatePropertyAnt.id());
+        }
+
         String[] updateProperties = null;
-        if(updatePropertyAnnotation != null && updatePropertyAnnotation.value().length > 0) {
-            updateProperties = helper.splitProperties(updatePropertyAnnotation.value());
+        if(updatePropertyAnt != null && updatePropertyAnt.value().length > 0) {
+            updateProperties = helper.splitProperties(updatePropertyAnt.value());
         }
         ColumnDesc[] columns = helper.getColumnFromProperty(parameters.length - 1, ctx, updateProperties);
+        if(columns == null) {
+            return null;
+        }
 
-        final Set<String> ignoreNullProperty = getIgnoreNullProperty(method, ctx);
+        final Set<String> ignoreNullProperty = getIgnoreNullProperty(updatePropertyAnt, ctx);
 
         SqlContainer sqlParts = new SqlContainer(ctx);
         for (ColumnDesc column : columns) {
@@ -104,11 +111,10 @@ public class UpdateSqlBuilder implements SqlBuilder {
         return sqlParts.toUpdateSql(ctx.getTableName());
     }
 
-    private Set<String> getIgnoreNullProperty(Method method, SqlBuilderContext ctx) {
+    private Set<String> getIgnoreNullProperty(UpdateProperty updatePropertyAnt, SqlBuilderContext ctx) {
         Set<String> ignoreNullProperty = new HashSet<String>();
-        UpdateProperty updatePropertyAnnotation = method.getAnnotation(UpdateProperty.class);
-        if (updatePropertyAnnotation != null && updatePropertyAnnotation.ignoreNullProperty() != null) {
-            String[] ignoreNullPropertyStr = ctx.getHelper().splitProperties(updatePropertyAnnotation.ignoreNullProperty());
+        if (updatePropertyAnt != null && updatePropertyAnt.ignoreNullProperty() != null) {
+            String[] ignoreNullPropertyStr = ctx.getHelper().splitProperties(updatePropertyAnt.ignoreNullProperty());
             ignoreNullProperty.addAll(Arrays.asList(ignoreNullPropertyStr));
         }
         return ignoreNullProperty;
