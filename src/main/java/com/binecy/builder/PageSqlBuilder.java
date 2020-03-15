@@ -45,11 +45,12 @@ public class PageSqlBuilder implements SqlBuilder {
 
         String selectSql = ctx.getSelectSqlBuilder().buildSql(ctx);
 
-        if(pageNum != null)
+        if(pageNum != null) {
             return selectSql.replace("<script>", "<script><bind name='pageOffset' value='(" + pageNum.getParamName() + "-1)*" + pageSize.getParamName() + "' />")
                     .replace("</script>", " limit #{pageOffset}, #{" + pageSize.getParamName() + "}</script>");
-        else
+        } else {
             return selectSql.replace("</script>", " limit #{" + pageSize.getParamName() + "}</script>");
+        }
     }
 
     @Override

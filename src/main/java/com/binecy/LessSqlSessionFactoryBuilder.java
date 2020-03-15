@@ -50,6 +50,7 @@ public class LessSqlSessionFactoryBuilder extends SqlSessionFactoryBuilder {
         }
     }
 
+    @Override
     public SqlSessionFactory build(InputStream inputStream, String environment, Properties properties) {
         try {
             XMLConfigBuilder parser = new XMLConfigBuilder(inputStream, environment, properties);
@@ -73,6 +74,7 @@ public class LessSqlSessionFactoryBuilder extends SqlSessionFactoryBuilder {
         }
     }
 
+    @Override
     public SqlSessionFactory build(Configuration config) {
         // 更新Configuration.mapperRegistry
         LessMapperRegistry registry = new LessMapperRegistry(config);

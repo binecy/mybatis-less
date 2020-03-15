@@ -12,8 +12,9 @@ public class SelectSqlBuilder implements SqlBuilder {
     @Override
     public String buildSql(SqlBuilderContext ctx) {
         ColumnDesc[] columnDesc = getColumnDesc(ctx);
-        if(columnDesc == null)
+        if(columnDesc == null) {
             return null;
+        }
 
         SqlContainer sqlContainer = new SqlContainer(ctx);
         if(columnDesc != null) {

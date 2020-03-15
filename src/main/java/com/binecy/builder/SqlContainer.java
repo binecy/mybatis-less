@@ -98,13 +98,15 @@ public class SqlContainer {
     }
 
     protected String toWhereSql() {
-        if(enhanceWhereSql != null)
+        if(enhanceWhereSql != null) {
             return "<where>" + enhanceWhereSql + "</where>";
+        }
 
         String whereSql = ifConditionJoin(" and ", whereColumnPart, true);
 
-        if(whereSql == null || whereSql.length() == 0)
+        if(whereSql == null || whereSql.length() == 0) {
             return "";
+        }
         return "<where>" + whereSql + "</where>";
     }
 
@@ -114,8 +116,9 @@ public class SqlContainer {
     }
 
     public String getIgnoreNullConditionIfNeed(ColumnDesc columnDesc, String actSql) {
-        if(!columnDesc.isIgnoreNull())
+        if(!columnDesc.isIgnoreNull()) {
             return actSql;
+        }
 
         String ignoreNullScr =
                 "<if test='" + columnDesc.getParamName() + " != null{{checkCollectionSize}}'>";
@@ -123,8 +126,9 @@ public class SqlContainer {
     }
 
     private String getIgnoreNullConditionInProperty(ColumnDesc columnDesc, String actSql) {
-        if(!columnDesc.isIgnoreNull())
+        if(!columnDesc.isIgnoreNull()) {
             return actSql;
+        }
 
         String ignoreNullScr =
                 "<if test='" + columnDesc.getParamName() + "." + columnDesc.getPropertyName() + " != null{{checkCollectionSize}}'>";
@@ -133,10 +137,11 @@ public class SqlContainer {
 
     private String generateIfCondition(String sqlStart, ColumnDesc columnDesc, String actSql) {
         if (columnDesc.isMultiValueParam()) {
-            if(columnDesc.isArrayParam())
+            if(columnDesc.isArrayParam()) {
                 sqlStart = sqlStart.replace("{{checkCollectionSize}}", " and " + columnDesc.getParamName() + ".length > 0");
-            else
+            } else {
                 sqlStart = sqlStart.replace("{{checkCollectionSize}}", " and " + columnDesc.getParamName() + ".size > 0");
+            }
         } else {
             sqlStart = sqlStart.replace("{{checkCollectionSize}}", "");
         }

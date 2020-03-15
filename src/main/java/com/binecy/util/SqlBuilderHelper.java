@@ -16,8 +16,9 @@ public class SqlBuilderHelper {
     private boolean isToUnderLine;   // 驼峰转下划线
 
     public ColumnDesc[] getColumnFromParam(List<Parameter> parameters, SqlBuilderContext ctx) {
-        if(parameters == null || parameters.isEmpty())
+        if(parameters == null || parameters.isEmpty()) {
             return new ColumnDesc[0];
+        }
 
         List<ColumnDesc> result = new ArrayList<>();
         Field[] fields = ctx.getMappingClass().getDeclaredFields();
@@ -36,8 +37,9 @@ public class SqlBuilderHelper {
 
         Field[] fields = ctx.getMappingClass().getDeclaredFields();
 
-        if(startIndex < 0 || endIndex < 0)
+        if(startIndex < 0 || endIndex < 0) {
             return new ColumnDesc[0];
+        }
 
         for(int i = startIndex; i < endIndex; i++) {
             Parameter param = parameters[i];
@@ -66,32 +68,32 @@ public class SqlBuilderHelper {
         column.setRelationalOperator(getRelationalOperator(param));
         column.setIgnoreNull(param.getAnnotation(IgnoreNull.class)!=null);
 
-        if(param.getType().isArray())
+        if(param.getType().isArray()) {
             column.setArrayParam(true);
+        }
         return column;
     }
 
     private String getRelationalOperator(Parameter p) {
         if(isCollection(p.getType())) {
-            if(p.getAnnotation(NotIn.class) != null)
-                return " not in ";
-            else
-                return " in ";
+            return p.getAnnotation(NotIn.class) != null ? " not in " : " in ";
         }
 
-        if (p.getAnnotation(NotEq.class) != null)
+        if (p.getAnnotation(NotEq.class) != null) {
             return "&lt;&gt;";
-        if (p.getAnnotation(Lt.class) != null)
+        } else if (p.getAnnotation(Lt.class) != null) {
             return "&lt;";
-        if (p.getAnnotation(Gt.class) != null)
+        } else if (p.getAnnotation(Gt.class) != null) {
             return "&gt;";
-        if (p.getAnnotation(Like.class) != null)
+        } else if (p.getAnnotation(Like.class) != null) {
             return " like ";
-        if (p.getAnnotation(GtEq.class) != null)
+        } else if (p.getAnnotation(GtEq.class) != null) {
             return "&gt;=";
-        if (p.getAnnotation(LtEq.class) != null)
+        } else if (p.getAnnotation(LtEq.class) != null) {
             return "&lt;=";
-        return "=";
+        } else {
+            return "=";
+        }
     }
 
 
@@ -248,11 +250,8 @@ public class SqlBuilderHelper {
 
         // 如果是单参数，mybatis会给这个参数一个固定名
         if (method != null && method.getParameterTypes().length == 1 ) {
-            if (isCollection(p.getType()) ) {
-                if(p.getType().isArray())
-                    return DEFAULT_ARRAY_NAME;
-                else
-                    return DEFAULT_COLLECTION_NAME;
+            if (isCollection(p.getType())) {
+                return p.getType().isArray() ? DEFAULT_ARRAY_NAME : DEFAULT_COLLECTION_NAME;
             } else {
                 return DEFAULT_PARAM_NAME;
             }

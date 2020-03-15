@@ -62,8 +62,9 @@ public class ReflectUtil {
     }
 
     public static Object invokeMethod(Object o, String methodName,Object... args) {
-        if(o == null)
+        if(o == null) {
             return null;
+        }
 
         Method[] methods = o.getClass().getMethods();
         for (Method method : methods) {

@@ -90,8 +90,9 @@ public class WhereSqlBuilder implements SqlBuilder {
     private String enhanceWhereSql(ColumnDesc[] columns, String whereSql, SqlBuilderContext ctx) {
         SqlContainer sqlContainer = ctx.getSqlContainer();
         for (ColumnDesc column : columns) {
-            if(!column.isIgnoreNull() && !column.isMultiValueParam())
+            if(!column.isIgnoreNull() && !column.isMultiValueParam()) {
                 continue;
+            }
 
             String columnName = column.getColumnName();
             String paramName = column.getParamName();
@@ -184,8 +185,9 @@ public class WhereSqlBuilder implements SqlBuilder {
         result.connector = "";
         if(start > 0) {
             int notSpaceIndex = start - 1;  // 向前找，去掉空格数
-            while (notSpaceIndex > 0 && Character.isSpaceChar(whereSql.charAt(notSpaceIndex)))
+            while (notSpaceIndex > 0 && Character.isSpaceChar(whereSql.charAt(notSpaceIndex))) {
                 notSpaceIndex--;
+            }
 
             // 找到前一个条件连接符and
             int andIndex = whereSql.lastIndexOf("and", start);

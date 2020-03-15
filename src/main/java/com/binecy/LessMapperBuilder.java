@@ -47,8 +47,9 @@ public class LessMapperBuilder {
 
     private boolean hasMybatisAnnotation(Method method) {
         for (Class<? extends Annotation> mybatisAnnotationType : MYBATIS_ANNOTATION_TYPES) {
-            if (method.getAnnotation(mybatisAnnotationType) != null)
+            if (method.getAnnotation(mybatisAnnotationType) != null) {
                 return true;
+            }
         }
         return false;
     }
@@ -133,7 +134,7 @@ public class LessMapperBuilder {
     private void setColumnMapping(TableMapping tableMappingAnnotation, SqlBuilderContext ctx) {
         ColumnMapping[] columnMappings = tableMappingAnnotation.columnMapping();
         if (columnMappings.length > 0) {
-            Map<String, String> propertyColumnMapping = new HashMap<>();
+            Map<String, String> propertyColumnMapping = new HashMap<>(columnMappings.length);
             for (ColumnMapping result : columnMappings) {
                 propertyColumnMapping.put(result.property(), result.column());
             }
